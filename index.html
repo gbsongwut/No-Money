@@ -1,0 +1,126 @@
+<script>
+
+const mockStockData = {
+  PTT: {
+    industry: "Resources",
+    roe: "12.8%",
+    roa: "6.1%",
+    gpm: "18.5%",
+    npm: "9.4%",
+    de: "0.82",
+    pe: "10.2",
+    pbv: "1.05",
+    current: "1.45",
+    summary: "กระแสเงินสดมั่นคง เหมาะกับสายปันผลระยะยาว"
+  },
+
+  KBANK: {
+    industry: "Financials",
+    roe: "9.9%",
+    roa: "1.2%",
+    gpm: "-",
+    npm: "24.2%",
+    de: "5.90",
+    pe: "8.7",
+    pbv: "0.72",
+    current: "-",
+    summary: "Valuation ต่ำ และมี upside หากเศรษฐกิจฟื้น"
+  },
+
+  CPALL: {
+    industry: "Services",
+    roe: "15.4%",
+    roa: "4.7%",
+    gpm: "22.9%",
+    npm: "3.6%",
+    de: "1.85",
+    pe: "29.1",
+    pbv: "4.62",
+    current: "0.82",
+    summary: "หุ้นเติบโตสูง แต่ valuation ค่อนข้างแพง"
+  }
+};
+
+function analyzeStocks(){
+
+  const stockInput = document
+    .getElementById("stockInput")
+    .value
+    .trim();
+
+  if(stockInput === ""){
+    alert("กรุณากรอกชื่อหุ้น");
+    return;
+  }
+
+  const stocks = stockInput
+    .split(",")
+    .map(stock => stock.trim().toUpperCase());
+
+  const tableBody = document.getElementById("tableBody");
+  const summaryBox = document.querySelector(".summary-box");
+
+  tableBody.innerHTML = "";
+  summaryBox.innerHTML = "";
+
+  let hasData = false;
+
+  stocks.forEach(stock => {
+
+    const data = mockStockData[stock];
+
+    if(data){
+
+      hasData = true;
+
+      const row = `
+        <tr>
+          <td>${stock}</td>
+          <td>${data.industry}</td>
+          <td class="positive">${data.roe}</td>
+          <td>${data.roa}</td>
+          <td>${data.gpm}</td>
+          <td>${data.npm}</td>
+          <td>${data.de}</td>
+          <td>${data.pe}</td>
+          <td>${data.pbv}</td>
+          <td>${data.current}</td>
+        </tr>
+      `;
+
+      tableBody.innerHTML += row;
+
+      const summaryCard = `
+        <div class="summary-card">
+          <h3>${stock}</h3>
+          <p>${data.summary}</p>
+        </div>
+      `;
+
+      summaryBox.innerHTML += summaryCard;
+
+    }
+
+  });
+
+  if(!hasData){
+
+    tableBody.innerHTML = `
+      <tr>
+        <td colspan="10" style="text-align:center;">
+          ไม่พบข้อมูลหุ้น
+        </td>
+      </tr>
+    `;
+
+    summaryBox.innerHTML = `
+      <div class="summary-card">
+        <h3>No Data</h3>
+        <p>ไม่พบข้อมูลหุ้นที่ค้นหา</p>
+      </div>
+    `;
+  }
+
+}
+
+</script>

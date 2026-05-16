@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>No money - Stock Analysis Interface</title>
+
+  <style>
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+      font-family: "Segoe UI", sans-serif;
+    }
+
+    body{
+      background:#0f172a;
+      color:#e2e8f0;
+      padding:30px;
+    }
+
+    .browser{
+      width:100%;
+      max-width:1400px;
+      margin:auto;
+      background:#111827;
+      border-radius:20px;
+      overflow:hidden;
+      box-shadow:0 10px 40px rgba(0,0,0,0.5);
+      border:1px solid #1e293b;
+    }
+
+    /* Browser Top */
+    .browser-top{
+      background:#1e293b;
+      padding:15px 20px;
+      display:flex;
+      align-items:center;
+      gap:12px;
+      border-bottom:1px solid #334155;
+    }
+
+    .dot{
+      width:14px;
+      height:14px;
+      border-radius:50%;
+    }
+
+    .red{ background:#ef4444; }
+    .yellow{ background:#f59e0b; }
+    .green{ background:#22c55e; }
+
+    .url-bar{
+      flex:1;
+      background:#0f172a;
+      padding:10px 15px;
+      border-radius:12px;
+      color:#94a3b8;
+      font-size:14px;
+      border:1px solid #334155;
+    }
+
+    /* Header */
+    .header{
+      padding:30px;
+      background:linear-gradient(135deg,#111827,#1e3a8a);
+      border-bottom:1px solid #334155;
+    }
+
+    .header h1{
+      font-size:42px;
+      font-weight:800;
+      margin-bottom:10px;
+    }
+
+    .header p{
+      color:#cbd5e1;
+      font-size:15px;
+    }
+
+    /* Section */
+    .section{
+      padding:30px;
+      border-bottom:1px solid #1e293b;
+    }
+
+    .section-title{
+      font-size:24px;
+      margin-bottom:20px;
+      font-weight:700;
+      color:#f8fafc;
+    }
+
+    /* Input */
+    .input-area{
+      display:flex;
+      gap:15px;
+      flex-wrap:wrap;
+    }
+
+    .input-area input{
+      flex:1;
+      min-width:300px;
+      padding:16px;
+      background:#0f172a;
+      border:1px solid #334155;
+      border-radius:14px;
+      color:white;
+      font-size:16px;
+      outline:none;
+    }
+
+    .input-area button{
+      padding:16px 30px;
+      border:none;
+      border-radius:14px;
+      background:linear-gradient(135deg,#3b82f6,#2563eb);
+      color:white;
+      font-size:16px;
+      cursor:pointer;
+      font-weight:700;
+      transition:0.2s;
+    }
+
+    .input-area button:hover{
+      transform:translateY(-2px);
+      opacity:0.9;
+    }
+
+    /* Table */
+    .table-container{
+      overflow-x:auto;
+      margin-top:20px;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      min-width:1000px;
+    }
+
+    th{
+      background:#1e40af;
+      padding:15px;
+      text-align:left;
+      font-size:14px;
+      color:white;
+    }
+
+    td{
+      padding:15px;
+      border-bottom:1px solid #334155;
+      background:#111827;
+      font-size:14px;
+    }
+
+    tr:hover td{
+      background:#172554;
+    }
+
+    .positive{
+      color:#22c55e;
+      font-weight:700;
+    }
+
+    .negative{
+      color:#ef4444;
+      font-weight:700;
+    }
+
+    /* Summary */
+    .summary-box{
+      background:#0f172a;
+      border:1px solid #334155;
+      border-radius:18px;
+      padding:25px;
+      line-height:1.8;
+    }
+
+    .summary-card{
+      background:#111827;
+      border-left:5px solid #3b82f6;
+      padding:20px;
+      border-radius:12px;
+      margin-bottom:20px;
+    }
+
+    .summary-card h3{
+      margin-bottom:10px;
+      color:#60a5fa;
+    }
+
+    /* Suggestion */
+    .suggestion{
+      background:linear-gradient(135deg,#14532d,#166534);
+      padding:25px;
+      border-radius:20px;
+      border:1px solid #22c55e;
+    }
+
+    .suggestion h2{
+      margin-bottom:15px;
+      font-size:28px;
+    }
+
+    .suggestion p{
+      line-height:1.9;
+      font-size:16px;
+    }
+
+    /* Footer */
+    .footer{
+      text-align:center;
+      padding:20px;
+      color:#94a3b8;
+      font-size:13px;
+      background:#020617;
+    }
+
+    @media(max-width:768px){
+
+      .header h1{
+        font-size:30px;
+      }
+
+      .section{
+        padding:20px;
+      }
+
+      .input-area{
+        flex-direction:column;
+      }
+
+      .input-area button{
+        width:100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="browser">
+
+    <!-- Browser Top -->
+    <div class="browser-top">
+      <div class="dot red"></div>
+      <div class="dot yellow"></div>
+      <div class="dot green"></div>
+
+      <div class="url-bar">
+        https://nomoney-analysis.ai
+      </div>
+    </div>
+
+    <!-- Header -->
+    <div class="header">
+      <h1>No money</h1>
+      <p>
+        Advanced SET Stock Analysis & Financial Comparison Platform
+      </p>
+    </div>
+
+    <!-- Section 1 -->
+    <div class="section">
+
+      <div class="section-title">
+        📌 Stock Analysis Input
+      </div>
+
+      <div class="input-area">
+        <input
+          type="text"
+          id="stockInput"
+          placeholder="กรอกชื่อหุ้น เช่น PTT, TOP, KBANK, SCB"
+        />
+
+        <button onclick="analyzeStocks()">
+          Analysis
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Section 2 -->
+    <div class="section">
+
+      <div class="section-title">
+        📊 Financial Comparison Table
+      </div>
+
+      <div class="table-container">
+
+        <table id="resultTable">
+
+          <thead>
+            <tr>
+              <th>Stock</th>
+              <th>Industry</th>
+              <th>ROE</th>
+              <th>ROA</th>
+              <th>GPM</th>
+              <th>NPM</th>
+              <th>D/E</th>
+              <th>P/E</th>
+              <th>P/BV</th>
+              <th>Current Ratio</th>
+            </tr>
+          </thead>
+
+          <tbody id="tableBody">
+
+            <tr>
+              <td>PTT</td>
+              <td>Resources</td>
+              <td class="positive">12.8%</td>
+              <td>6.1%</td>
+              <td>18.5%</td>
+              <td>9.4%</td>
+              <td>0.82</td>
+              <td>10.2</td>
+              <td>1.05</td>
+              <td>1.45</td>
+            </tr>
+
+            <tr>
+              <td>KBANK</td>
+              <td>Financials</td>
+              <td class="positive">9.9%</td>
+              <td>1.2%</td>
+              <td>-</td>
+              <td>24.2%</td>
+              <td>5.90</td>
+              <td>8.7</td>
+              <td>0.72</td>
+              <td>-</td>
+            </tr>
+
+            <tr>
+              <td>CPALL</td>
+              <td>Services</td>
+              <td class="positive">15.4%</td>
+              <td>4.7%</td>
+              <td>22.9%</td>
+              <td>3.6%</td>
+              <td>1.85</td>
+              <td>29.1</td>
+              <td>4.62</td>
+              <td>0.82</td>
+            </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+    <!-- Section 3 -->
+    <div class="section">
+
+      <div class="section-title">
+        📝 Summary
+      </div>
+
+      <div class="summary-box">
+
+        <div class="summary-card">
+          <h3>PTT</h3>
+          <p>
+            มีฐานะการเงินแข็งแรง กระแสเงินสดมั่นคง และค่า P/BV อยู่ในระดับไม่แพง
+            เหมาะกับนักลงทุนระยะยาวที่ต้องการหุ้นขนาดใหญ่และปันผลสม่ำเสมอ
+          </p>
+        </div>
+
+        <div class="summary-card">
+          <h3>KBANK</h3>
+          <p>
+            มี ROE อยู่ในระดับดีเมื่อเทียบกับกลุ่มธนาคาร และมี valuation ต่ำ
+            แต่ยังต้องติดตามคุณภาพสินเชื่อและแนวโน้ม NPL ในอนาคต
+          </p>
+        </div>
+
+        <div class="summary-card">
+          <h3>CPALL</h3>
+          <p>
+            มีความสามารถในการเติบโตสูงจากธุรกิจค้าปลีกและสาขาที่ครอบคลุมทั่วประเทศ
+            แต่ valuation อยู่ในระดับค่อนข้างสูงเมื่อเทียบกับตลาด
+          </p>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Section 4 -->
+    <div class="section">
+
+      <div class="suggestion">
+
+        <h2>
+          💡 Suggestion
+        </h2>
+
+        <p>
+          หากต้องการหุ้น Defensive และกระแสเงินสดมั่นคง PTT ถือว่าน่าสนใจ
+          สำหรับนักลงทุนที่มองการฟื้นตัวของเศรษฐกิจและดอกเบี้ย KBANK
+          มี upside จาก valuation ที่ยังต่ำ ส่วน CPALL เหมาะกับนักลงทุน
+          ที่ต้องการการเติบโตระยะยาวแม้ valuation จะสูงกว่าเพื่อนในกลุ่ม
+        </p>
+
+      </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      No money © 2026 | SET Financial Analysis Interface
+    </div>
+
+  </div>
+
+  <script>
+
+    function analyzeStocks(){
+
+      const stockInput = document.getElementById("stockInput").value;
+
+      if(stockInput.trim() === ""){
+        alert("กรุณากรอกชื่อหุ้น");
+        return;
+      }
+
+      alert(
+        "กำลังวิเคราะห์หุ้น: " + stockInput +
+        "\\n\\n(No money demo interface)"
+      );
+    }
+
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>No money | SET Financial Analyzer</title>
+<style>
+*{
+box-sizing:border-box;
+font-family: Consolas, Monaco, monospace;
+}
+
+body{
+margin:0;
+background:#050505;
+color:#00ff88;
+padding:20px;
+}
+
+.terminal{
+max-width:1400px;
+margin:auto;
+border:1px solid #00ff88;
+box-shadow:0 0 20px rgba(0,255,136,.25);
+min-height:95vh;
+}
+
+.header{
+padding:15px 20px;
+border-bottom:1px solid #00ff88;
+font-size:20px;
+font-weight:bold;
+}
+
+.section{
+padding:20px;
+border-bottom:1px solid rgba(0,255,136,.25);
+}
+
+.input-row{
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+}
+
+input{
+flex:1;
+min-width:250px;
+padding:12px;
+background:#000;
+color:#00ff88;
+border:1px solid #00ff88;
+outline:none;
+font-size:16px;
+}
+
+button{
+padding:12px 24px;
+background:#00ff88;
+color:#000;
+border:none;
+cursor:pointer;
+font-weight:bold;
+}
+
+button:hover{
+background:#00cc6d;
+}
+
+h2{
+margin-top:0;
+color:#7dffb8;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+margin-top:15px;
+overflow-x:auto;
+}
+
+th, td{
+border:1px solid rgba(0,255,136,.3);
+padding:10px;
+text-align:center;
+}
+
+th{
+background:rgba(0,255,136,.08);
+}
+
+.summary-card{
+border:1px solid rgba(0,255,136,.25);
+padding:15px;
+margin-bottom:15px;
+}
+
+.suggestion{
+padding:15px;
+background:rgba(0,255,136,.05);
+border-left:4px solid #00ff88;
+line-height:1.7;
+}
+
+.loading{
+color:#ffee58;
+}
+
+.hidden{
+display:none;
+}
+
+.badge{
+color:#000;
+background:#00ff88;
+padding:2px 8px;
+font-size:12px;
+margin-left:10px;
+}
+</style>
+</head>
+<body>
+
+<div class="terminal">
+
+<div class="header">
+No money | SET Financial Analyzer
+</div>
+
+<!-- SECTION 1 -->
+<div class="section">
+<h2>ส่วนที่ 1 : วิเคราะห์หุ้น</h2>
+<div class="input-row">
+<input id="tickerInput" placeholder="กรอกหุ้น เช่น PTT,CPALL,KBANK,GULF">
+<button onclick="analyzeStocks()">ANALYSIS ▶</button>
+</div>
+</div>
+
+<!-- SECTION 2 -->
+<div class="section">
+<h2>ส่วนที่ 2 : ตารางเปรียบเทียบ</h2>
+<div id="tableArea">
+กรุณากรอก ticker แล้วกด ANALYSIS
+</div>
+</div>
+
+<!-- SECTION 3 -->
+<div class="section">
+<h2>ส่วนที่ 3 : Summary</h2>
+<div id="summaryArea">
+รอการวิเคราะห์...
+</div>
+</div>
+
+<!-- SECTION 4 -->
+<div class="section">
+<h2>ส่วนที่ 4 : 💡 Suggestion</h2>
+<div id="suggestionArea" class="suggestion">
+รอการวิเคราะห์...
+</div>
+</div>
+
+</div>
+
+# <script>
+/*
+
+# NO MONEY CORE
+
+ตัวอย่าง demo logic
+เชื่อม API SET จริงภายหลังได้
+*/
+
+const stockDB = {
+PTT:{
+sector:"Resources",
+ratios:{
+ROCE:"12.5%",
+EBITDA:"325B",
+"D/E":"0.72",
+OCF:"210B",
+"Net Profit":"94B",
+"P/CF":"6.1",
+"P/BV":"1.0"
+},
+summary:"หุ้นพลังงานขนาดใหญ่ กระแสเงินสดแข็งแรง ปันผลสม่ำเสมอ"
+},
+
+CPALL:{
+sector:"Services",
+ratios:{
+"Net Profit":"23B",
+EBIT:"41B",
+ROA:"4.5%",
+ROE:"14.1%",
+"P/E":"25.2",
+"P/BV":"4.8",
+"D/E":"1.65",
+"Current Ratio":"0.72"
+},
+summary:"หุ้นค้าปลีก Defensive เติบโตต่อเนื่องแต่ valuation สูง"
+},
+
+KBANK:{
+sector:"Financials",
+ratios:{
+ROE:"8.9%",
+NIM:"3.5%",
+"NPL Coverage":"152%",
+"NPL Ratio":"3.2%",
+"P/BV":"0.71",
+"Dividend Yield":"4.4%"
+},
+summary:"ธนาคารใหญ่ valuation ต่ำ ปันผลดี ความเสี่ยงจาก NPL ต้องติดตาม"
+},
+
+GULF:{
+sector:"Resources",
+ratios:{
+ROCE:"8.2%",
+EBITDA:"45B",
+"D/E":"1.85",
+OCF:"18B",
+"Net Profit":"17B",
+"P/CF":"22",
+"P/BV":"3.8"
+},
+summary:"หุ้นเติบโตสูง แต่ leverage สูง valuation premium"
+}
+};
+
+function analyzeStocks(){
+
+const raw=document.getElementById("tickerInput").value.trim();
+
+if(!raw){
+alert("กรุณากรอก ticker");
+return;
+}
+
+const tickers=raw
+.split(",")
+.map(x=>x.trim().toUpperCase());
+
+document.getElementById("tableArea").innerHTML =
+"<div class='loading'>กำลังวิเคราะห์...</div>";
+
+setTimeout(()=>renderAnalysis(tickers),800);
+}
+
+function renderAnalysis(tickers){
+
+let valid=tickers.filter(t=>stockDB[t]);
+
+if(valid.length===0){
+document.getElementById("tableArea").innerHTML=
+"ไม่พบข้อมูลหุ้น";
+return;
+}
+
+const groups={};
+
+valid.forEach(t=>{
+const sec=stockDB[t].sector;
+if(!groups[sec]) groups[sec]=[];
+groups[sec].push(t);
+});
+
+let html="";
+
+for(let sector in groups){
+
+```
+const list=groups[sector];
+
+const metrics=
+  Object.keys(stockDB[list[0]].ratios);
+
+html+=`
+  <h3>${sector}
+  <span class="badge">${list.length} stocks</span>
+  </h3>
+  <table>
+    <tr>
+      <th>Ratio</th>
+      ${list.map(x=>`<th>${x}</th>`).join("")}
+    </tr>
+`;
+
+metrics.forEach(m=>{
+  html+=`
+  <tr>
+    <td>${m}</td>
+    ${list.map(t=>
+      `<td>${stockDB[t].ratios[m]||"-"}</td>`
+    ).join("")}
+  </tr>`;
+});
+
+html+="</table><br>";
+```
+
+}
+
+document.getElementById("tableArea").innerHTML=html;
+
+renderSummary(valid);
+renderSuggestion(valid);
+}
+
+function renderSummary(list){
+
+let html="";
+
+list.forEach(t=>{
+html+=      `<div class="summary-card">         <strong>${t}</strong><br>         ${stockDB[t].summary}       </div>`    ;
+});
+
+document.getElementById("summaryArea").innerHTML=html;
+}
+
+function renderSuggestion(list){
+
+let txt="";
+
+if(list.includes("PTT"))
+txt+="• เหมาะสำหรับสายปันผลและถือระยะยาว<br>";
+
+if(list.includes("CPALL"))
+txt+="• เหมาะสำหรับ defensive growth<br>";
+
+if(list.includes("KBANK"))
+txt+="• เหมาะสำหรับ value play + dividend<br>";
+
+if(list.includes("GULF"))
+txt+="• เหมาะสำหรับนักลงทุนรับความผันผวนได้สูง<br>";
+
+txt+="<br><strong>ควรกระจายความเสี่ยงระหว่างหลาย sector</strong>";
+
+document.getElementById("suggestionArea").innerHTML=txt;
+}
+</script>
+
+</body>
+</html>
